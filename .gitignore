@@ -51,3 +51,7 @@ app.*.map.json
 # Node backend
 node_modules/
 .env
+
+# RAWG API KEY
+lib/
+config.dart
