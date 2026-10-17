@@ -1,8 +1,12 @@
 import 'package:flutter/foundation.dart';
 import '../models/rawg_game.dart';
 import '../models/rawg_game_details.dart';
+import '../models/user_list.dart';
 
 class GameSearchController extends ChangeNotifier {
+  // Temporary until login exists: eveything uses the test user
+  static const int testUserId = 2;
+
   List<RawgGame> results = [];
   String? error;
   bool hasSearched = false;
@@ -33,5 +37,13 @@ class GameSearchController extends ChangeNotifier {
     final details = await RawgGameDetails.fetch(id);
     _detailsCache[id] = details;
     return details;
+  }
+
+  Future<List<UserList>> getLists() {
+    return UserList.fetchForUser(testUserId);
+  }
+
+  Future<bool> addGameToList(int listId, int rawgId) {
+    return UserList.addGame(testUserId, listId, rawgId);
   }
 }

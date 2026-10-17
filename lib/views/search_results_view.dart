@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import '../controllers/game_search_controller.dart';
-import '../models/rawg_game.dart';
-import '../models/rawg_game_details.dart';
 
 class SearchResultsView extends StatefulWidget {
   const SearchResultsView({super.key});
@@ -19,17 +17,18 @@ class _SearchResultsViewState extends State<SearchResultsView> {
     super.dispose();
   }
 
-  void _showDetails(RawgGame game) {
-    final future = controller.getDetails(game.id);
+  void _showDetails(int gameId, String gameName) {
+    final future = controller.getDetails(gameId);
+    final listsFuture = controller.getLists();
 
     showDialog(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: Text(game.name),
+          title: Text(gameName),
           content: SizedBox(
             width: double.maxFinite,
-            child: FutureBuilder<RawgGameDetails>(
+            child: FutureBuilder(
               future: future,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
@@ -76,12 +75,79 @@ class _SearchResultsViewState extends State<SearchResultsView> {
               onPressed: () => Navigator.of(dialogContext).pop(),
               child: const Text('Close'),
             ),
+            FutureBuilder(
+              future: listsFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const ElevatedButton(
+                    onPressed: null,
+                    child: Text('Add to list'),
+                  );
+                }
+                if (snapshot.hasError) {
+                  debugPrint('Lists failed: ${snapshot.error}');
+                  return const ElevatedButton(
+                    onPressed: null,
+                    child: Text('Lists unavailable'),
+                  );
+                }
+
+                final lists = snapshot.data!;
+                if (lists.isEmpty) {
+                  return const ElevatedButton(
+                    onPressed: null,
+                    child: Text('No Lists Yet'),
+                  );
+                }
+
+                return MenuAnchor(
+                  menuChildren: [
+                    for (final list in lists)
+                      MenuItemButton(
+                        onPressed: () async {
+                          String message;
+                          try {
+                            final added = 
+                              await controller.addGameToList(list.id, gameId);
+                            message = added
+                              ? 'Added $gameName to ${list.name}'
+                              : '$gameName is already in ${list.name}';
+                          } catch (e) {
+                            debugPrint('Add failed: $e');
+                            message = 'Could not add $gameName. Please try again.';
+                          }
+
+                          if (!dialogContext.mounted) return;
+                          Navigator.of(dialogContext).pop();
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(message)),
+                          );
+                        },
+                        child: Text(list.name),
+                      ),
+                  ],
+                  builder: (context, menuController, child) {
+                    return ElevatedButton(
+                      onPressed: () {
+                        if (menuController.isOpen) {
+                          menuController.close();
+                        } else {
+                          menuController.open();
+                        }
+                      },
+                      child: const Text('Add to list'),
+                    );
+                  },
+                );
+              },
+            ),
           ],
         );
       },
     );
   }
-
+    
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -115,7 +181,7 @@ class _SearchResultsViewState extends State<SearchResultsView> {
                     itemBuilder: (context, index) {
                       final game = controller.results[index];
                       return ListTile(
-                        onTap: () => _showDetails(game),
+                        onTap: () => _showDetails(game.id, game.name),
                         leading: SizedBox(
                           width: 80,
                           height: 60,
