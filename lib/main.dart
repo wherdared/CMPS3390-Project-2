@@ -1,6 +1,5 @@
 import 'package:appdev_proj2/views/home.dart';
 import 'package:flutter/material.dart';
-import 'views/search_results_view.dart';
 
 void main() {
   runApp(const MainApp());
