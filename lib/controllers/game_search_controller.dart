@@ -10,11 +10,16 @@ class GameSearchController extends ChangeNotifier {
   List<RawgGame> results = [];
   String? error;
   bool hasSearched = false;
+  bool isLoading = false;
   final Map<int, RawgGameDetails> _detailsCache = {};
 
     Future<void> search(String text) async {
     final query = text.trim();
-    if (query.isEmpty) return;
+    if (query.isEmpty || isLoading) return;
+
+    isLoading = true;
+    error = null;
+    notifyListeners();
 
     try {
       results = await RawgGame.search(query);
@@ -26,6 +31,7 @@ class GameSearchController extends ChangeNotifier {
     }
 
     hasSearched = true;
+    isLoading = false;
     notifyListeners();
   }
 

@@ -6,14 +6,21 @@ class RawgGame {
   final int id;
   final String name;
   final String? imageUrl;
+  final String? released;
 
-  RawgGame({required this.id, required this.name, this.imageUrl});
+  RawgGame({
+    required this.id, 
+    required this.name, 
+    this.imageUrl,
+    this.released,
+  });
 
   factory RawgGame.fromJson(Map<String, dynamic> json) {
     return RawgGame(
       id: json['id'],
       name: json['name'],
       imageUrl: json['background_image'],
+      released: json['released'],
     );
   }
 
