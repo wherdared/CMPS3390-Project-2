@@ -1,5 +1,5 @@
+import 'package:appdev_proj2/views/home.dart';
 import 'package:flutter/material.dart';
-import 'views/search_results_view.dart';
 
 void main() {
   runApp(const MainApp());
@@ -12,7 +12,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Game Tracker',
-      home: const SearchResultsView(),
+      home: HomeScreen(),
     );
   }
 }
