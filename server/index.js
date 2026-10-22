@@ -4,7 +4,7 @@ const express = require('express');
 const pool = require('./db/connection');
 const crypto = require('crypto');
 const argon2 = require('argon2');
-const { generateToken } = require('./auth');
+const { generateToken, authenticateToken } = require('./auth');
 
 if (!process.env.JWT_SECRET) {
   console.error('JWT_SECRET missing from .env. Run: npm run setup');
@@ -18,8 +18,6 @@ app.use((req, res, next) => {
   console.log(req.method, req.url);
   next();
 });
-
-const JWT_SECRET = process.env.JWT_SECRET;
 
 const VALID_STATUSES = ['want to play', 'playing', 'finished'];
 
@@ -178,13 +176,13 @@ app.post('/login', async (req, res) => {
     return res.status(401).json({ error: 'Invalid username or password' });
   }
 
-  // TODO: create the signed JWT here and send it along
-  // res.json({ id: user.id, username: user.username });
-
-  // FIXME
   const token = generateToken(user.id);
   res.json({ token });
 });
+
+//app.get('/whoami', authenticateToken, (req, res) => {
+//  res.json({ userId: req.userId });
+//});
 
 // error handler
 app.use((err, req, res, next) => {
