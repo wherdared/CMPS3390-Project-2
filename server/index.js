@@ -1,7 +1,15 @@
+require('dotenv').config(); // first, before anything reads process.env
+
 const express = require('express');
 const pool = require('./db/connection');
 const crypto = require('crypto');
 const argon2 = require('argon2');
+const { generateToken } = require('./auth');
+
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET missing from .env. Run: npm run setup');
+  process.exit(1);
+}
 
 const app = express();
 app.use(express.json());
@@ -10,6 +18,8 @@ app.use((req, res, next) => {
   console.log(req.method, req.url);
   next();
 });
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const VALID_STATUSES = ['want to play', 'playing', 'finished'];
 
@@ -151,12 +161,14 @@ app.post('/signup', async (req, res) => {
 app.post('/login', async (req, res) => {
   const { username, password } = readCreds(req);
 
+  // Find the user from DB
   const result = await pool.query(
     'SELECT id, username, password_hash FROM users WHERE username = $1',
     [username]
   );
   const user = result.rows[0]; // undefined if no user has that username
 
+  // Compare password to stored hash
   // Always run verify, even for unknown usernames, so response time doesn't reveal which usernames exist
   // .catch(() => false) treats a broken or non-Argon2 hash as a wrong password instead of crashing
   const hashToCheck = user ? user.password_hash : dummyHash;
@@ -167,7 +179,11 @@ app.post('/login', async (req, res) => {
   }
 
   // TODO: create the signed JWT here and send it along
-  res.json({ id: user.id, username: user.username });
+  // res.json({ id: user.id, username: user.username });
+
+  // FIXME
+  const token = generateToken(user.id);
+  res.json({ token });
 });
 
 // error handler
