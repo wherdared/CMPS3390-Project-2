@@ -1,4 +1,4 @@
-import 'package:appdev_proj2/views/home.dart';
+import 'package:appdev_proj2/views/login.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -12,7 +12,7 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return const MaterialApp(
       title: 'Game Tracker',
-      home: HomeScreen(),
+      home: LoginScreen(),
     );
   }
 }
