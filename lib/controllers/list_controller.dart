@@ -2,10 +2,13 @@ import 'package:flutter/foundation.dart';
 import '../models/user_list.dart';
 import '../models/rawg_game_details.dart';
 import '../models/list_entry.dart';
+import '../models/auth.dart';
+
 
 class ListController extends ChangeNotifier {
   // temporary until login exists
-  static const int testUserId = 2;
+  // static const int testUserId = 2;
+  static int get testUserId => Auth.userId!; // user id of current user logged in
 
   List<UserList> lists = [];
   bool isLoading = false;

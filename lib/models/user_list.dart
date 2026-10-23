@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'auth.dart'; // Auth.headers adds the login token to requests to our server
 
 
 // an error that carries the server's own readable message like
@@ -29,7 +30,7 @@ class UserList {
   static Future<List<UserList>> fetchForUser(int userId) async {
     final uri = Uri.parse('$baseUrl/users/$userId/lists');
 
-    final response = await http.get(uri);
+    final response = await http.get(uri, headers: Auth.headers); // sends the JWT so server know who's asking
     if (response.statusCode != 200) {
       throw Exception('Server request failed (status ${response.statusCode})');
     }
@@ -46,7 +47,7 @@ class UserList {
 
     final response = await http.post(
       uri,
-      headers: {'Content-Type': "application/json"},
+      headers: Auth.headers, // JSON content type + login token
       body: jsonEncode({'name': name}),
     );
 
@@ -68,7 +69,7 @@ static Future<void> rename(int userId, int listId, String name) async {
 
   final response = await http.patch(
     uri,
-    headers: {'Content-Type': 'application/json'},
+    headers: Auth.headers, // JSON content type + login token
     body: jsonEncode({'name': name}),
   );
 
@@ -86,7 +87,7 @@ static Future<void> rename(int userId, int listId, String name) async {
 static Future<void> delete(int userId, int listId) async {
   final uri = Uri.parse('$baseUrl/users/$userId/lists/$listId');
 
-  final response = await http.delete(uri);
+  final response = await http.delete(uri, headers: Auth.headers); // sends the JWT so server know who's asking
   
   if (response.statusCode == 200) return;
   if (response.statusCode == 400 || response.statusCode == 404) {
@@ -102,7 +103,7 @@ static Future<void> delete(int userId, int listId) async {
 
     final response = await http.post(
       uri,
-      headers: {'Content-Type': 'application/json'},
+      headers: Auth.headers, // JSON content type + login token
       body: jsonEncode({'rawg_id': rawgId}),
     );
 

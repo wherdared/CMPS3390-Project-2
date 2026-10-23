@@ -2,10 +2,12 @@ import 'package:flutter/foundation.dart';
 import '../models/rawg_game.dart';
 import '../models/rawg_game_details.dart';
 import '../models/user_list.dart';
+import '../models/auth.dart';
 
 class GameSearchController extends ChangeNotifier {
   // Temporary until login exists: eveything uses the test user
-  static const int testUserId = 2;
+  // static const int testUserId = 2;
+  static int get testUserId => Auth.userId!; // user id of current user logged in
 
   List<RawgGame> results = [];
   String? error;
