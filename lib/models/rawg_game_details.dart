@@ -8,6 +8,10 @@ class RawgGameDetails {
   final String? imageUrl;
   final String? description;
   final double? rating;
+  final String? released;
+  final List<String> genres;
+  final List<String> platforms;
+  final List<String> publishers;
 
   RawgGameDetails({
     required this.id,
@@ -15,12 +19,28 @@ class RawgGameDetails {
     this.imageUrl,
     this.description,
     this.rating,
+    this.released,
+    this.genres = const [],
+    this.platforms = const [],
+    this.publishers = const [],
   });
 
   factory RawgGameDetails.fromJson(Map<String, dynamic> json) {
     final rawDescription = (json['description_raw'] as String?)?.trim();
     final ratingsCount = (json['ratings_count'] as num?) ?? 0;
     final rating = json['rating'] as num?;
+
+    final genres = (json['genres'] as List? ?? [])
+      .map((genre) => genre['name'] as String)
+      .toList();
+
+    final platforms = (json['platforms'] as List? ?? [])
+      .map((entry) => entry['platform']['name'] as String)
+      .toList();
+
+    final publishers = (json['publishers'] as List? ?? [])
+      .map((publisher) => publisher['name'] as String)
+      .toList();
 
     return RawgGameDetails(
       id: json['id'],
@@ -30,6 +50,10 @@ class RawgGameDetails {
         ? null
         : rawDescription,
         rating: (rating != null && ratingsCount > 0) ? rating.toDouble() : null,
+        released: json['released'],
+        genres: genres,
+        platforms: platforms,
+        publishers: publishers,
     );
   }
 
