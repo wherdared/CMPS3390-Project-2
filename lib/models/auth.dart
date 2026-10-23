@@ -28,7 +28,21 @@ class Auth {
   // Loads the saved login, if any
   static Future<void> restore() async {
     String? session = await storage.read(key: 'session');
-    if (session != null) _remember(session);
+    if (session == null) return; // Saved JWT? No → Log In
+    _remember(session);
+
+    // Valid JWT? Any protected route works; the server checks the token.
+    try {
+      final response = await http.get(
+        Uri.parse('${UserList.baseUrl}/users/$userId/lists'),
+        headers: headers,
+      );
+      // 401 = expired or logged out (denylist) → forget it and show Log In
+      if (response.statusCode == 401) {
+        userId = null; // main.dart sees no user and opens Log In
+        await storage.delete(key: 'session');
+      }
+    } catch (_) {} // server offline: keep the saved login
   }
   // Keeps the token, id, and username from a /login response
   static void _remember(String json) {
