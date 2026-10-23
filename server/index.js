@@ -4,7 +4,7 @@ const express = require('express');
 const pool = require('./db/connection');
 const crypto = require('crypto');
 const argon2 = require('argon2');
-const { generateToken, authenticateToken } = require('./auth');
+const { generateToken, authenticateToken, checkSameUser } = require('./auth');
 
 if (!process.env.JWT_SECRET) {
   console.error('JWT_SECRET missing from .env. Run: npm run setup');
@@ -19,6 +19,8 @@ app.use((req, res, next) => {
   next();
 });
 
+// Every /users/:userId/ route requires a valid token & own userId
+app.use('/users/:userId', authenticateToken, checkSameUser);
 const VALID_STATUSES = ['want to play', 'playing', 'finished'];
 
 // Health check: confirms that the server can reach the database
@@ -351,7 +353,7 @@ app.post('/login', async (req, res) => {
   }
 
   const token = generateToken(user.id);
-  res.json({ token });
+  res.json({ token, userId: user.id });
 });
 
 //app.get('/whoami', authenticateToken, (req, res) => {

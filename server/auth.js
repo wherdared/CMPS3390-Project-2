@@ -31,4 +31,11 @@ function authenticateToken(req, res, next) {
   }
 }
 
-module.exports = { generateToken, authenticateToken };
+function checkSameUser(req, res, next) {
+  if (Number(req.params.userId) !== req.userId) {
+    return res.status(403).json({ error: 'Not allowed' });
+  }
+  next();
+}
+
+module.exports = { generateToken, authenticateToken, checkSameUser };
