@@ -4,7 +4,8 @@ const express = require('express');
 const pool = require('./db/connection');
 const crypto = require('crypto');
 const argon2 = require('argon2');
-const { generateToken, authenticateToken, checkSameUser } = require('./auth');
+const { generateToken, authenticateToken, checkSameUser, revokeToken } = require('./auth');
+const { reverse } = require('dns');
 
 if (!process.env.JWT_SECRET) {
   console.error('JWT_SECRET missing from .env. Run: npm run setup');
@@ -332,6 +333,8 @@ app.post('/signup', async (req, res) => {
   }
 });
 
+app.post('/logout', authenticateToken, revokeToken);
+
 app.post('/login', async (req, res) => {
   const { username, password } = readCreds(req);
 
@@ -353,7 +356,7 @@ app.post('/login', async (req, res) => {
   }
 
   const token = generateToken(user.id);
-  res.json({ token, userId: user.id });
+  res.json({ token, userId: user.id, username: user.username });
 });
 
 //app.get('/whoami', authenticateToken, (req, res) => {
